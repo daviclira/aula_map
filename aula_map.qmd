@@ -1,0 +1,86 @@
+---
+title: "aula_map"
+format: 
+html: 
+toc: true
+
+editor: visual
+---
+
+## Aula map
+
+```{r}
+
+
+cr <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1bq2N19DcZdtax2fQW9OHSGMR0X2__Z9T/edit?gid=1871397229#gid=1871397229")
+
+cr
+```
+
+## Visualizar os dados
+
+#### usaremos a função datatable, do pacote \[DT\]
+
+```{r}
+library(tidyverse)
+install.packages("DT")
+library(DT)
+
+datatable(cr)
+
+
+```
+
+```{r}
+
+cr %>% 
+  ggplot(aes(lon, lat)) + 
+  geom_point()
+  
+
+```
+
+```{r}
+install.packages("rnaturalearth")
+installed.packages("remotes")
+install.packages("sf")
+install.packages("terra")
+install.packages("ggthemes")
+install.packages("ggspacial")
+
+library(remotes)
+
+remotes::install_github("ropensci/rnaturalearthhires")
+
+install.packages(
+  "rnaturalearthhires",
+  repos = "https://ropensci.r-universe.dev",
+  type = "source"
+)
+
+library(rnaturalearth)
+library(rnaturalearthhires)
+library(ggthemes)
+library(ggspatial)
+
+ETH <- ne_states(country = "Ethiopia",
+                 returnclass = "sf")
+
+ETH %>% 
+  ggplot() + 
+  geom_sf(fill = "white") +
+  geom_point(data = cr, aes(lon, lat, color = inc)) +
+  scale_color_viridis_c() +
+  annotation_scale(location = "tl") +
+  theme_map() +
+  annotation_north_arrow(location = "br", which_north = "true") + 
+  labs(title = "Ferrugem do café na Etiopia", 
+       y = "Latitude", 
+       x = "Longitude", 
+       subtitle = "Levantamento em fazedas", 
+       caption = "Fonte: Del Ponte et al., 2025", 
+       color = "Incidência (%)")
+
+ggsave("mapa_ethiopia.png", bg = "white")
+
+```
